@@ -1,0 +1,63 @@
+/* Responsive adjustments */
+
+/* Mobile first enhancements */
+@media (max-width: 575.98px) {
+  .hero {
+    min-height: 70vh;
+    text-align: center;
+  }
+  .hero-content {
+    margin: 0 auto;
+  }
+  .hero-actions {
+    justify-content: center;
+  }
+  .auth-card {
+    padding: 1.75rem 1.25rem;
+  }
+  .section {
+    padding: 3rem 0;
+  }
+  .recipe-card-meta {
+    gap: 0.75rem;
+  }
+  .toast-container {
+    left: 12px;
+    right: 12px;
+    max-width: none;
+  }
+}
+
+@media (min-width: 576px) and (max-width: 767.98px) {
+  .hero {
+    min-height: 75vh;
+  }
+}
+
+@media (max-width: 991.98px) {
+  .navbar-collapse {
+    background: var(--card);
+    margin-top: 0.75rem;
+    padding: 1rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+  }
+  .nav-link {
+    padding: 0.75rem 1rem !important;
+  }
+}
+
+/* Large screens */
+@media (min-width: 1400px) {
+  .container {
+    max-width: 1320px;
+  }
+}
+
+/* Recipe detail sticky panel */
+@media (min-width: 992px) {
+  .recipe-info-sticky {
+    position: sticky;
+    top: 100px;
+  }
+}
