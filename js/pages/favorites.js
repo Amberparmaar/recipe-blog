@@ -1,7 +1,3 @@
-/**
- * Favorites page — list saved recipes, remove favorite
- */
-
 import { initNavbar } from '../components/navbar.js';
 import { initFooter } from '../components/footer.js';
 import { onAuthChange } from '../firebase/auth.js';

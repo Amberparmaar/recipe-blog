@@ -37,7 +37,7 @@ async function loadProfile() {
         email: currentUser.email,
         photoURL: currentUser.photoURL || '',
         bio: '',
-        createdAt: null
+        createdAt: null,
       };
     }
     renderProfile();

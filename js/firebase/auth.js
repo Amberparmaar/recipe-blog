@@ -5,13 +5,18 @@ import {
   onAuthStateChanged,
   updateProfile,
   sendPasswordResetEmail,
-  sendEmailVerification
+  sendEmailVerification,
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import {
+  doc,
+  setDoc,
+  serverTimestamp,
+  getDoc,
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { auth, db } from "./firebase-config.js";
 import { showToast } from "../utils.js";
 
-export async function signUp(name, email, password, photoURL = '') {
+export async function signUp(name, email, password, photoURL = "") {
   console.log("1. Signup started");
 
   const cred = await createUserWithEmailAndPassword(auth, email, password);
@@ -20,7 +25,7 @@ export async function signUp(name, email, password, photoURL = '') {
 
   await updateProfile(cred.user, {
     displayName: name,
-    photoURL
+    photoURL,
   });
 
   console.log("3. Profile updated in Authentication");
@@ -28,18 +33,17 @@ export async function signUp(name, email, password, photoURL = '') {
   try {
     console.log("4. Creating Firestore user document...");
 
-    await setDoc(doc(db, 'users', cred.user.uid), {
+    await setDoc(doc(db, "users", cred.user.uid), {
       uid: cred.user.uid,
       name,
       email,
-      photoURL: photoURL || '',
-      bio: '',
-      role: 'user',
-      createdAt: serverTimestamp()
+      photoURL: photoURL || "",
+      bio: "",
+      role: "user",
+      createdAt: serverTimestamp(),
     });
 
     console.log("5. Firestore user document CREATED:", cred.user.uid);
-
   } catch (error) {
     console.error("FIRESTORE USER DOCUMENT ERROR:", error);
     throw error;
@@ -48,7 +52,7 @@ export async function signUp(name, email, password, photoURL = '') {
   try {
     await sendEmailVerification(cred.user);
   } catch (e) {
-    console.warn('Verification email failed', e);
+    console.warn("Verification email failed", e);
   }
 
   return cred.user;
@@ -60,10 +64,15 @@ export async function login(email, password) {
 }
 
 /** Logout */
+export async function clearAuthSession() {
+  await signOut(auth);
+  localStorage.removeItem("user");
+}
+
 export async function logout() {
   await signOut(auth);
-  showToast('Logged out', 'See you next time!', 'info');
-  window.location.href = 'index.html';
+  showToast("Logged out", "See you next time!", "info");
+  window.location.href = "index.html";
 }
 
 /** Password reset */
@@ -80,3 +89,43 @@ export function onAuthChange(callback) {
 export function getCurrentUser() {
   return auth.currentUser;
 }
+
+onAuthStateChanged(auth, async (_user) => {
+  if (_user) {
+    console.log("Logged in user:", _user.uid);
+
+    try {
+      // Firestore se user document get karo
+      const userRef = doc(db, "users", _user.uid);
+      const docSnap = await getDoc(userRef);
+
+      if (docSnap.exists()) {
+        const user = docSnap.data();
+        if (user.isActive === false || user.isActive === "false") {
+          localStorage.removeItem("user");
+          await signOut(auth);
+
+          return;
+        }
+
+        // User data localStorage mein save karo
+        localStorage.setItem(
+          "user",
+          JSON.stringify({
+            ...user,
+            uid: _user.uid,
+          }),
+        );
+
+        console.log("User saved in localStorage:", user);
+      } else {
+        console.log("User Not Found!");
+      }
+    } catch (error) {
+      console.error("Error getting user data:", error);
+    }
+  } else {
+    console.log("No user is signed in.");
+    localStorage.removeItem("user");
+  }
+});

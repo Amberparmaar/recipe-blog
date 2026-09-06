@@ -51,6 +51,7 @@ export function initNavbar() {
           <i class="fas fa-user"></i> ${user.displayName || 'Profile'}
         </a>
         <button class="btn btn-ghost btn-sm" id="btn-logout"><i class="fas fa-sign-out-alt"></i></button>
+         <a href="../admin/dashboard.html" class="btn-primary rounded-4 btn-sm"><i class="fa-solid fa-dice-four"></i></a>
       `;
       document.getElementById('btn-logout')?.addEventListener('click', logout);
     } else {

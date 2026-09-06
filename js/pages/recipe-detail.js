@@ -155,28 +155,91 @@ function render(r) {
 
 async function loadComments() {
   const list = document.getElementById('comments-list');
-  if (!list) return;
+
+  if (!list) {
+    console.error("❌ comments-list not found");
+    return;
+  }
+
+  // Loading message
+  list.innerHTML = `
+    <p class="text-muted">Loading comments...</p>
+  `;
+
   try {
     const comments = await getComments(id);
-    if (!comments.length) {
-      list.innerHTML = '<p class="text-muted">No comments yet. Be the first!</p>';
+
+    console.log("✅ Comments loaded:", comments);
+
+    if (!comments || comments.length === 0) {
+      list.innerHTML = `
+        <p class="text-muted">
+          No comments yet. Be the first!
+        </p>
+      `;
       return;
     }
-    list.innerHTML = comments.map(c => `
-      <div class="comment-item">
-        <div class="comment-avatar bg-secondary rounded-circle d-flex align-items-center justify-content-center" style="width:40px;height:40px">
-          <i class="fas fa-user"></i>
-        </div>
-        <div class="comment-body">
-          <div class="comment-meta">
-            <span class="comment-author">${c.userName}</span>
-            <span class="comment-date">${formatDate(c.createdAt)}</span>
+
+    list.innerHTML = comments.map(c => {
+
+      let date = "Just now";
+
+      if (c.createdAt?.toDate) {
+        date = formatDate(c.createdAt);
+      }
+
+      return `
+        <div class="comment-item d-flex gap-3 mb-4">
+
+          <div 
+            class="comment-avatar bg-secondary rounded-circle d-flex align-items-center justify-content-center"
+            style="width:40px;height:40px;min-width:40px;"
+          >
+            ${
+              c.userPhoto
+                ? `<img 
+                    src="${c.userPhoto}" 
+                    alt="${c.userName || 'User'}"
+                    style="width:40px;height:40px;border-radius:50%;object-fit:cover;"
+                  >`
+                : `<i class="fas fa-user"></i>`
+            }
           </div>
-          <p class="mb-0">${c.text}</p>
+
+          <div class="comment-body">
+
+            <div class="comment-meta mb-1">
+              <span class="comment-author fw-bold">
+                ${c.userName || 'User'}
+              </span>
+
+              <span class="comment-date text-muted ms-2">
+                ${date}
+              </span>
+            </div>
+
+            <p class="mb-0">
+              ${c.text || ''}
+            </p>
+
+          </div>
+
         </div>
+      `;
+    }).join('');
+
+  } catch (error) {
+
+    console.error("❌ Error loading comments:", error);
+
+    list.innerHTML = `
+      <div class="alert alert-danger">
+        Unable to load comments.
+        <br>
+        <small>${error.message}</small>
       </div>
-    `).join('');
-  } catch(e) { list.innerHTML = ''; }
+    `;
+  }
 }
 
 load();
